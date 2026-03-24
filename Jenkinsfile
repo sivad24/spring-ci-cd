@@ -2,10 +2,37 @@ pipeline {
     agent any
 
     stages {
-        stage('Test Stage') {
+        stage('Build App') {
+            steps {
+                sh './mvnw clean package'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh '/usr/local/bin/docker build -t spring-ci-cd:${BUILD_NUMBER} .'
+            }
+        }
+
+        stage('Verify Image') {
+            steps {
+                sh '/usr/local/bin/docker images | grep my-app'
+            }
+        }
+
+        stage('Docker Test') {
             steps {
                 sh '/usr/local/bin/docker ps'
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Build ${BUILD_NUMBER} successful"
+        }
+        failure {
+            echo "❌ Build failed"
         }
     }
 }
