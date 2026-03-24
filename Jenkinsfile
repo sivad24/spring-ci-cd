@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Test Stage') {
             steps {
-                echo '🎉 Jenkins pipeline triggered successfully!'
+                sh 'docker ps'
             }
         }
     }
