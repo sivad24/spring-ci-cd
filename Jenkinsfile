@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Test Stage') {
             steps {
-                sh 'docker ps'
+                sh '/usr/local/bin/docker ps'
             }
         }
     }
