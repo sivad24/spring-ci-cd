@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Image tag to deploy')
+    }
+
+    environment {
+        IMAGE_NAME = "sivadhanush24/spring-ci-cd"
+        KUBECTL    = "/opt/homebrew/bin/kubectl"
+        KUBECONFIG = "/Users/dhanush/.kube/config"
+    }
+
+    stages {
+
+        stage('Verify Cluster') {
+            steps {
+                sh '${KUBECTL} cluster-info'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '${KUBECTL} apply -k k8s/'
+            }
+        }
+
+        stage('Update Image Tag') {
+            steps {
+                sh '''
+                    ${KUBECTL} set image deployment/spring-app \
+                        spring-app=${IMAGE_NAME}:${IMAGE_TAG} \
+                        --record
+                '''
+            }
+        }
+
+        stage('Wait for Rollout') {
+            steps {
+                sh '${KUBECTL} rollout status deployment/spring-app --timeout=120s'
+            }
+        }
+
+        stage('Verify') {
+            steps {
+                sh '${KUBECTL} get pods -l app=spring-app'
+                sh '${KUBECTL} get svc spring-app'
+                sh '${KUBECTL} get ingress spring-app'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "CD passed — build ${IMAGE_TAG} deployed to Minikube"
+        }
+        failure {
+            sh '${KUBECTL} rollout undo deployment/spring-app || true'
+            echo "CD failed — rolled back to previous version"
+        }
+    }
+}

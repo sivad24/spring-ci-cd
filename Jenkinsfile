@@ -43,6 +43,14 @@ pipeline {
                 sh '/usr/local/bin/docker push ${IMAGE_NAME}:latest'
             }
         }
+
+        stage('Trigger CD') {
+            steps {
+                build job: 'spring-cd',
+                parameters: [string(name: 'IMAGE_TAG', value: "${BUILD_NUMBER}")],
+                wait: false
+            }
+        }
     }
 
     post {
