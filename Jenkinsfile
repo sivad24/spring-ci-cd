@@ -24,15 +24,21 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh '/usr/local/bin/docker build -t spring-ci-cd:${BUILD_NUMBER} .'
+                sh '/usr/local/bin/docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .'
             }
         }
 
-        stage('Verify Image') {
+        stage('Login DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh 'echo $PASS | /usr/local/bin/docker login -u $USER --password-stdin'
                 }
+            }
+        }
+
+        stage('Check Images') {
+            steps {
+                sh '/usr/local/bin/docker images'
             }
         }
 
