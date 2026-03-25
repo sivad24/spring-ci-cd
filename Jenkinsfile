@@ -4,6 +4,7 @@ pipeline {
     environment {
         JAVA_HOME = "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
         PATH = "${JAVA_HOME}/bin:/usr/local/bin:/usr/bin:/bin"
+        IMAGE_NAME = "sivadhanush24/spring-ci-cd"
     }
 
     stages {
@@ -29,13 +30,15 @@ pipeline {
 
         stage('Verify Image') {
             steps {
-                sh '/usr/local/bin/docker images --format "{{.Repository}}:{{.Tag}}" | grep spring-ci-cd'
+                withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh 'echo $PASS | /usr/local/bin/docker login -u $USER --password-stdin'
+                }
             }
         }
 
-        stage('Docker Test') {
+        stage('Push Image') {
             steps {
-                sh '/usr/local/bin/docker ps'
+                sh '/usr/local/bin/docker push $IMAGE_NAME:${BUILD_NUMBER}'
             }
         }
     }
