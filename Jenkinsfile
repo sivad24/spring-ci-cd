@@ -1,7 +1,20 @@
 pipeline {
     agent any
 
+    environment {
+        JAVA_HOME = "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+        PATH = "${JAVA_HOME}/bin:/usr/local/bin:/usr/bin:/bin"
+    }
+
     stages {
+
+        stage('Check Java') {
+                    steps {
+                        sh 'echo JAVA_HOME=$JAVA_HOME'
+                        sh 'java -version'
+                    }
+                }
+
         stage('Build App') {
             steps {
                 sh './mvnw clean package'
