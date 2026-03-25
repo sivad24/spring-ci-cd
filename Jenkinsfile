@@ -29,7 +29,7 @@ pipeline {
 
         stage('Verify Image') {
             steps {
-                sh '/usr/local/bin/docker images | grep my-app'
+                sh '/usr/local/bin/docker images --format "{{.Repository}}:{{.Tag}}" | grep spring-ci-cd'
             }
         }
 
