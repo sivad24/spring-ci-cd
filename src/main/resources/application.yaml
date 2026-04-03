@@ -1,6 +1,17 @@
 spring:
   application:
     name: Reactive-CI-CD
+  r2dbc:
+    url: ${SPRING_R2DBC_URL}
+    username: ${SPRING_R2DBC_USERNAME}
+    password: ${SPRING_R2DBC_PASSWORD}
+  sql:
+    init:
+      mode: always
+      schema-location: classpath:schema.sql
+
+server:
+  port: 8080
 
 management:
   endpoints:
@@ -10,3 +21,4 @@ management:
   endpoint:
     health:
       show-details: never
+

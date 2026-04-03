@@ -9,6 +9,7 @@ pipeline {
         IMAGE_NAME = "sivadhanush24/spring-ci-cd"
         KUBECTL    = "/opt/homebrew/bin/kubectl"
         KUBECONFIG = "/Users/dhanush/.kube/config"
+        NAMESPACE = "reactive-app"
     }
 
     stages {
@@ -16,12 +17,19 @@ pipeline {
         stage('Verify Cluster') {
             steps {
                 sh '${KUBECTL} cluster-info'
+                sh '${KUBECTL} get nodes'
+            }
+        }
+
+        stage('Create Namespace') {
+            steps {
+                sh '${KUBECTL} apply -f k8s/namespace.yaml'
             }
         }
 
         stage('Deploy') {
             steps {
-                sh '${KUBECTL} apply -k k8s/'
+                sh '${KUBECTL} apply -k k8s/ --namespace=${NAMESPACE}'
             }
         }
 
@@ -30,22 +38,29 @@ pipeline {
                 sh '''
                     ${KUBECTL} set image deployment/spring-app \
                         spring-app=${IMAGE_NAME}:${IMAGE_TAG} \
-                        --record
+                        -n ${NAMESPACE}
                 '''
             }
         }
 
+        stage('Wait for Postgres') {
+             steps {
+                 sh '${KUBECTL} rollout status deployment/postgres --timeout=120s -n ${NAMESPACE}'
+             }
+        }
+
         stage('Wait for Rollout') {
             steps {
-                sh '${KUBECTL} rollout status deployment/spring-app --timeout=120s'
+                sh '${KUBECTL} rollout status deployment/spring-app --timeout=120s -n ${NAMESPACE}'
             }
         }
 
         stage('Verify') {
             steps {
-                sh '${KUBECTL} get pods -l app=spring-app'
-                sh '${KUBECTL} get svc spring-app'
-                sh '${KUBECTL} get ingress spring-app'
+                sh '${KUBECTL} get pods -n ${NAMESPACE}'
+                sh '${KUBECTL} get svc -n ${NAMESPACE}'
+                sh '${KUBECTL} get ingress -n ${NAMESPACE}'
+                sh '${KUBECTL} get networkpolicies -n ${NAMESPACE}'
             }
         }
     }
@@ -55,7 +70,7 @@ pipeline {
             echo "CD passed — build ${IMAGE_TAG} deployed to Minikube"
         }
         failure {
-            sh '${KUBECTL} rollout undo deployment/spring-app || true'
+            sh '${KUBECTL} rollout undo deployment/spring-app -n ${NAMESPACE} || true'
             echo "CD failed — rolled back to previous version"
         }
     }

@@ -1,7 +1,9 @@
+# k8s/app/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: spring-app
+  name: spring-service
+  namespace: reactive-app
   labels:
     app: spring-app
 spec:
@@ -9,6 +11,5 @@ spec:
   selector:
     app: spring-app
   ports:
-    - protocol: TCP
-      port: 80
+    - port: 80
       targetPort: 8080

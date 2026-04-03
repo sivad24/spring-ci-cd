@@ -1,19 +1,21 @@
+# k8s/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: spring-app
+  name: spring-ingress
+  namespace: reactive-app
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
-    - host: spring-app.local
+    - host: reactive-app.local
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: spring-app
+                name: spring-service
                 port:
                   number: 80

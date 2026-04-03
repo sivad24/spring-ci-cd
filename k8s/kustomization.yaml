@@ -1,7 +1,15 @@
+# k8s/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - deployment.yaml
-  - service.yaml
+  - namespace.yaml
+  - secrets.yaml
+  - configmap.yaml
+  - postgres/pvc.yaml
+  - postgres/deployment.yaml
+  - postgres/service.yaml
+  - app/deployment.yaml
+  - app/service.yaml
   - ingress.yaml
+  - networkpolicy.yaml

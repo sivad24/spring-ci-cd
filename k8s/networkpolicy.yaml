@@ -1,0 +1,43 @@
+# k8s/networkpolicy.yaml
+---
+# allow only spring-app to reach postgres
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-network-policy
+  namespace: reactive-app
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: spring-app
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# allow only ingress controller to reach spring-app
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: spring-network-policy
+  namespace: reactive-app
+spec:
+  podSelector:
+    matchLabels:
+      app: spring-app
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
