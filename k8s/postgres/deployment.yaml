@@ -38,13 +38,13 @@ spec:
                   key: password
           volumeMounts:
             - name: postgres-storage
-              mountPath: /var/lib/postgres/data
+              mountPath: /var/lib/postgresql/data
           readinessProbe:
             exec:
               command:
                 - sh
                 - -c
-                - pg_isready -U $(POSTGRES_USER)
+                - "pg_isready -U $POSTGRES_USER"
             initialDelaySeconds: 10
             periodSeconds: 5
       volumes:

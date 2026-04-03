@@ -22,11 +22,11 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: DB_PORT
+            - name: DB_HOST
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: DB_PORT
+                  key: DB_HOST
             - name: DB_PORT
               valueFrom:
                 configMapKeyRef:
